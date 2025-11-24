@@ -5,6 +5,7 @@ import alatau.city.bankaccount.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,9 @@ public class AccountController {
 
     @PostMapping("/transfer")
     @Operation(summary = "Transfer money between accounts",
-                description = "Transfers specified amount from sender account to receiver account")
+                description = "Transfers specified amount from sender account to receiver account",
+                security = @SecurityRequirement(name = "basicAuth")
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transfer completed successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request (validation or business error"),
