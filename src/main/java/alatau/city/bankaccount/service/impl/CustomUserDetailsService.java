@@ -1,6 +1,6 @@
 package alatau.city.bankaccount.service.impl;
 
-import alatau.city.bankaccount.entities.User;
+import alatau.city.bankaccount.entities.Users;
 import alatau.city.bankaccount.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,13 +16,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        Users users = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .roles(user.getRole())
+                .withUsername(users.getUsername())
+                .password(users.getPassword())
+                .roles(users.getRole())
                 .build();
     }
 }
