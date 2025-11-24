@@ -2,7 +2,9 @@ package alatau.city.bankaccount.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,7 +32,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/actuator/health",
-                                "/auth/register"
+                                "/auth/register",
+                                "/auth/login"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -40,13 +43,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("batyr")
-                .password("{noop}password")
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config
+    ) throws Exception {
+        return config.getAuthenticationManager();
     }
 
 }

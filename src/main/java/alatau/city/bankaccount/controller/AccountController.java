@@ -22,8 +22,7 @@ public class AccountController {
 
     @PostMapping("/transfer")
     @Operation(summary = "Transfer money between accounts",
-                description = "Transfers specified amount from sender account to receiver account",
-                security = @SecurityRequirement(name = "basicAuth")
+                description = "Transfers specified amount from sender account to receiver account"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transfer completed successfully"),

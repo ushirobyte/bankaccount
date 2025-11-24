@@ -1,5 +1,7 @@
 package alatau.city.bankaccount.controller;
 
+import alatau.city.bankaccount.entities.dto.JwtResponse;
+import alatau.city.bankaccount.entities.dto.LoginRequest;
 import alatau.city.bankaccount.entities.dto.RegisterRequest;
 import alatau.city.bankaccount.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +25,13 @@ public class AuthController {
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         authService.register(registerRequest);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Login and get JWT token")
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        JwtResponse jwtResponse = authService.login(loginRequest);
+        return ResponseEntity.ok(jwtResponse);
     }
 
 }
