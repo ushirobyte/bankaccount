@@ -2,13 +2,18 @@ package alatau.city.bankaccount.service.impl;
 
 import alatau.city.bankaccount.entities.Account;
 import alatau.city.bankaccount.entities.Transaction;
+import alatau.city.bankaccount.entities.Users;
 import alatau.city.bankaccount.entities.dto.AccountDTO;
-import alatau.city.bankaccount.entities.response.TransactionResponse;
+import alatau.city.bankaccount.entities.dto.CreateAccountRequest;
+import alatau.city.bankaccount.entities.dto.TransactionResponse;
 import alatau.city.bankaccount.repository.AccountRepository;
 import alatau.city.bankaccount.repository.TransactionRepository;
+import alatau.city.bankaccount.repository.UserRepository;
 import alatau.city.bankaccount.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +28,21 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
 
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
 
     @Override
     @Transactional
     public void transfer(AccountDTO accountDTO) {
+
+        String currentUserName = SecurityContextHolder.getContext()
+                        .getAuthentication()
+                                .getName();
+
+        Users currentUser = userRepository.findByUsername(currentUserName)
+                        .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(currentUser.getRole());
 
         log.info("Transfer request: from={} to={} amount={}",
                 accountDTO.getNumberOfAccountSender(),
@@ -41,6 +56,10 @@ public class AccountServiceImpl implements AccountService {
         Account accountSender = accountRepository.findByNumberOfAccount(accountDTO.getNumberOfAccountSender());
         if (accountSender == null) {
             throw new IllegalArgumentException("Sender account not found");
+        }
+
+        if (!isAdmin && !accountSender.getOwner().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("You can transfer money only from your own accounts");
         }
 
         Account accountReceiver = accountRepository.findByNumberOfAccount(accountDTO.getNumberOfAccountReceiver());
@@ -91,5 +110,28 @@ public class AccountServiceImpl implements AccountService {
                         t.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public Account createAccount(CreateAccountRequest accountRequest) {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+
+        Account account = Account.builder()
+                .numberOfAccount(generateAccountNumber())
+                .amount(accountRequest.getInitialAmount())
+                .owner(user)
+                .build();
+
+        return accountRepository.save(account);
+    }
+
+    private String generateAccountNumber() {
+        return String.valueOf(System.currentTimeMillis());
     }
 }
