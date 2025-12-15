@@ -1,6 +1,9 @@
 package alatau.city.bankaccount.controller;
 
+import alatau.city.bankaccount.entities.Account;
 import alatau.city.bankaccount.entities.dto.AccountDTO;
+import alatau.city.bankaccount.entities.dto.AccountResponse;
+import alatau.city.bankaccount.entities.dto.CreateAccountRequest;
 import alatau.city.bankaccount.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +26,8 @@ public class AccountController {
 
     @PostMapping("/transfer")
     @Operation(summary = "Transfer money between accounts",
-                description = "Transfers specified amount from sender account to receiver account"
+                description = "Transfers specified amount from sender account to receiver account",
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transfer completed successfully"),
@@ -39,6 +44,25 @@ public class AccountController {
             description = "Returns list of transactions where this account is sender or receiver")
     public ResponseEntity<?> getTransactionResponseList(@PathVariable String accountNumber) {
         return ResponseEntity.ok(accountService.getTransactionResponseList(accountNumber));
+    }
+
+    @PostMapping
+    @Operation(
+            summary = "Create new account for current user",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<AccountResponse> createAccount(
+            @Valid @RequestBody CreateAccountRequest createAccountRequest
+            ) {
+        Account account = accountService.createAccount(createAccountRequest);
+
+        AccountResponse accountResponse = new AccountResponse(
+                account.getId(),
+                account.getNumberOfAccount(),
+                account.getAmount()
+        );
+
+        return new ResponseEntity<>(accountResponse, HttpStatus.CREATED);
     }
 
 }

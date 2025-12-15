@@ -1,4 +1,4 @@
-package alatau.city.bankaccount.entities.response;
+package alatau.city.bankaccount.entities.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
